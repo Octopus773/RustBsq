@@ -17,6 +17,14 @@ impl<'a> World<'a> {
     }
 }
 
+/// Checks if the the square of the specified size fit at the coords
+///
+/// # Arguments
+///
+/// * `world` - The data to look into
+/// * `coords` - The top left corner of the square to check
+/// * `size` - Size of the square to check starting at coords 
+///
 pub fn is_square_valid(world: &World, coords: (usize, usize), size: usize) -> bool {
     for l in world.world.lines().skip(coords.0).take(size) {
         if l[coords.1..coords.1 + size].graphemes(true).any(|g| g != world.empty_char) {
