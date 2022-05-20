@@ -149,9 +149,6 @@ pub fn find_biggest_square(world: &World) -> Option<Square> {
 
 pub fn print_world_and_square(mut world: World, square: &Square) {
     let s = std::iter::repeat("x").take(square.size).collect::<String>();
-
-    println!("s :{} square! {:?}", s, square);
-
     for i in square.y..square.y + square.size {
         let offset = (world.width + 1) * i + square.x;
         world.world.replace_range(offset..offset + square.size, &s);
