@@ -1,18 +1,56 @@
+use std::fs;
+use std::io;
 
-pub struct World<'a> {
-    world: &'a str,
+pub struct World {
+    world: String,
     empty_char: char,
     width: usize,
 }
 
 
-impl<'a> World<'a> {
-    pub fn new(world: &'a str) -> World {
+impl World {
+    pub fn new(world: String) -> World {
         World {
+            width: world.lines().count(),
             world,
             empty_char: '.',
-            width: world.lines().count(),
         }
+    }
+
+    /// Epitech Bsq scenario enforcing almost all mandatory checks (missing that only some types of char are allowed)
+    /// 
+    /// # Arguments
+    /// 
+    /// * `path_to_file` - The path to the Epitech formatted BSQ file
+    /// 
+    pub fn new_from_epitech_file(path_to_file: &str) -> io::Result<World> {
+        let data = fs::read_to_string(path_to_file)?;
+        let mut lines = data.lines();
+
+        let number_of_lines = match lines.next() {
+            None => return Err(io::Error::new(io::ErrorKind::Other, "The file must have the number of lines at the first line")),
+            Some(s) => s.parse::<usize>().unwrap()
+        };
+
+        let mut i = 0;
+        for l in lines {
+            i += 1;
+            if l.len() != number_of_lines {
+                return Err(io::Error::new(io::ErrorKind::Other, format!("The content of the file must be a square; error on line {}", i)));
+            }
+        }
+        if i != number_of_lines {
+            return Err(io::Error::new(
+                io::ErrorKind::Other, 
+                format!("The content of the file must be a square; Too much lines, found {}, expected {}", i , number_of_lines)
+            ));
+        }
+
+        Ok(World {
+            world: data,
+            empty_char: '.',
+            width: number_of_lines
+        })
     }
 }
 
@@ -95,7 +133,7 @@ pub fn find_biggest_square(world: &World) -> Option<(usize, usize, usize)> {
 mod test {
     #[test]
     fn is_square_valid() {
-        let world = super::World::new("..3\n1..\n...");
+        let world = super::World::new(String::from("..3\n1..\n..."));
         assert_eq!(super::is_square_valid(&world, (0, 0), 2), false);
         assert_eq!(super::is_square_valid(&world, (0, 0), 1), true);
         assert_eq!(super::is_square_valid(&world, (1, 1), 2), true);
@@ -106,7 +144,7 @@ mod test {
 
     #[test]
     fn get_max_size_from_coords() {
-        let world = super::World::new("..3\n1..\n...");
+        let world = super::World::new(String::from("..3\n1..\n..."));
         assert_eq!(super::get_max_size_from_coords(&world, (0, 0)), 1);
         assert_eq!(super::get_max_size_from_coords(&world, (1, 1)), 2);
         assert_eq!(super::get_max_size_from_coords(&world, (2, 1)), 1);
@@ -114,14 +152,14 @@ mod test {
 
     #[test]
     fn find_biggest_square() {
-        let world = super::World::new("..3\n1..\n...");
+        let world = super::World::new(String::from("..3\n1..\n..."));
         assert_eq!(super::find_biggest_square(&world), Some((1, 1, 2)));
 
 
-        let world = super::World::new(".....\n.....\n.....");
+        let world = super::World::new(String::from(".....\n.....\n....."));
         assert_eq!(super::find_biggest_square(&world), Some((0, 0, 3)));
 
-        let world = super::World::new(".....\n.....\n.....\n.....\n.....\n");
+        let world = super::World::new(String::from(".....\n.....\n.....\n.....\n.....\n"));
         assert_eq!(super::find_biggest_square(&world), Some((0, 0, 5)));
     }
 }
