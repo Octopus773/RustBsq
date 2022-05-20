@@ -27,11 +27,28 @@ impl<'a> World<'a> {
 ///
 pub fn is_square_valid(world: &World, coords: (usize, usize), size: usize) -> bool {
     for l in world.world.lines().skip(coords.0).take(size) {
-        if l[coords.1..coords.1 + size].graphemes(true).any(|g| g != world.empty_char) {
+        let ss = match l.get(coords.1..coords.1 + size) {
+            None => return false,
+            Some(ss) => ss,
+        };
+        if ss.graphemes(true).any(|g| g != world.empty_char) {
             return false;
         }
     }
     true
+}
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn is_square_valid() {
+        let world = super::World::new("..3\n1..\n...");
+        assert_eq!(super::is_square_valid(&world, (0, 0), 2), false);
+        assert_eq!(super::is_square_valid(&world, (0, 0), 1), true);
+        assert_eq!(super::is_square_valid(&world, (1, 1), 2), true);
+        assert_eq!(super::is_square_valid(&world, (1, 0), 1), false);
+        assert_eq!(super::is_square_valid(&world, (2, 2), 12), false);
+    }
 }
 /*
 fn get_max_size_from_coords(world: &World, coords: (usize, usize)) -> i32 {
