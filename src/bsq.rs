@@ -60,15 +60,35 @@ fn get_max_size_from_coords(world: &World, coords: (usize, usize)) -> usize {
     }
 }
 
-pub fn find_biggest_square(world: &World) -> Option<(usize, usize)> {
+
+/// Gives the coords and the size of the biggest square on the world
+/// 
+/// # Arguments
+/// 
+/// * `world` - The world to look for the square
+/// 
+/// Returns None if no square was found
+/// 
+/// Return Some(y_coord, x_coord, size) of the biggest possible square on the map
+/// 
+pub fn find_biggest_square(world: &World) -> Option<(usize, usize, usize)> {
+    let mut max_coords = (0, 0, 0);
     for (i, l) in world.world.lines().enumerate() {
         for (j, c) in l.chars().enumerate() {
-            if c == world.empty_char {
-                return Some((i, j));
+            if c != world.empty_char {
+                continue;
+            }
+            let m_s = get_max_size_from_coords(world, (i, j));
+
+            if m_s > max_coords.2 {
+                max_coords = (i, j, m_s);
             }
         }
     }
-    None
+    if max_coords.2 == 0 {
+        return None;
+    }
+    Some(max_coords)
 }
 
 #[cfg(test)]
@@ -90,5 +110,18 @@ mod test {
         assert_eq!(super::get_max_size_from_coords(&world, (0, 0)), 1);
         assert_eq!(super::get_max_size_from_coords(&world, (1, 1)), 2);
         assert_eq!(super::get_max_size_from_coords(&world, (2, 1)), 1);
+    }
+
+    #[test]
+    fn find_biggest_square() {
+        let world = super::World::new("..3\n1..\n...");
+        assert_eq!(super::find_biggest_square(&world), Some((1, 1, 2)));
+
+
+        let world = super::World::new(".....\n.....\n.....");
+        assert_eq!(super::find_biggest_square(&world), Some((0, 0, 3)));
+
+        let world = super::World::new(".....\n.....\n.....\n.....\n.....\n");
+        assert_eq!(super::find_biggest_square(&world), Some((0, 0, 5)));
     }
 }
