@@ -24,7 +24,7 @@ impl World {
     /// * `path_to_file` - The path to the Epitech formatted BSQ file
     /// 
     pub fn new_from_epitech_file(path_to_file: &str) -> io::Result<World> {
-        let data = fs::read_to_string(path_to_file)?;
+        let mut data = fs::read_to_string(path_to_file)?;
         let mut lines = data.lines();
 
         let number_of_lines = match lines.next() {
@@ -36,7 +36,7 @@ impl World {
         for l in lines {
             i += 1;
             if l.len() != number_of_lines {
-                return Err(io::Error::new(io::ErrorKind::Other, format!("The content of the file must be a square; error on line {}", i)));
+                return Err(io::Error::new(io::ErrorKind::Other, format!("The content of the file must be a square; error on line {}", i + 1)));
             }
         }
         if i != number_of_lines {
@@ -46,6 +46,7 @@ impl World {
             ));
         }
 
+        data.drain(..=data.chars().position(|c| c == '\n').unwrap());
         Ok(World {
             world: data,
             empty_char: '.',
@@ -140,6 +141,9 @@ mod test {
         assert_eq!(super::is_square_valid(&world, (1, 0), 1), false);
         assert_eq!(super::is_square_valid(&world, (2, 2), 12), false);
         assert_eq!(super::is_square_valid(&world, (2, 1), 2), false);
+
+        let world = super::World::new(String::from("...\n...\n.o."));
+        assert_eq!(super::is_square_valid(&world, (1, 0), 2), false);
     }
 
     #[test]
