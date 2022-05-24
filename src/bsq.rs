@@ -1,5 +1,6 @@
 use std::fs;
 use std::io;
+use std::cmp;
 
 pub struct World {
     world: String,
@@ -82,18 +83,14 @@ impl World {
 /// * `size` - Size of the square to check starting at coords 
 ///
 pub fn is_square_valid(world: &World, s: &Square) -> bool {
-    let mut assessed_lines = 0;
-    for l in world.world.lines().skip(s.y).take(s.size) {
-        assessed_lines += 1;
-        let ss = match l.get(s.x..s.x + s.size) {
-            None => return false,
-            Some(ss) => ss,
-        };
-        if ss.chars().any(|g| g != world.empty_char) {
-            return false;
+    for i in s.y..cmp::min(s.y + s.size, world.width) {
+        for j in s.x..cmp::min(s.x + s.size, world.width) {
+            if world.world.as_bytes()[i * world.width + j] != '.' as u8 {
+                return false;
+            }
         }
     }
-    assessed_lines == s.size
+    true
 }
 
 /// Gives the size of the maximum legal square at coords
