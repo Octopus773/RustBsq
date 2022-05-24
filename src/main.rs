@@ -7,7 +7,7 @@ fn main() -> io::Result<()> {
 
     match bsq::find_biggest_square(&world) {
         Some(square) => bsq::print_world_and_square(world, &square),
-        None => println!("No square found"),
+        None => bsq::print_world(&world),
     };
     Ok(())
 }

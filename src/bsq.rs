@@ -145,10 +145,10 @@ pub fn is_square_enlargment_valid(world: &World, s: &Square) -> bool {
 /// * `coords` - The top left corner of the square to check
 ///
 fn get_max_size_from_coords(world: &World, coords: (usize, usize)) -> usize {
-    let mut max_size = 2;
+    let mut max_size = 1;
     loop {
-        if !is_square_valid(world, &Square{ y: coords.0, x: coords.1, size: max_size}) {
-            return max_size - 1;
+        if !is_square_enlargment_valid(world, &Square{ y: coords.0, x: coords.1, size: max_size}) {
+            return max_size;
         }
         max_size += 1;
     }
@@ -190,6 +190,10 @@ pub fn print_world_and_square(mut world: World, square: &Square) {
         let offset = (world.width + 1) * i + square.x;
         world.world.replace_range(offset..offset + square.size, &s);
     }
+    print!("{}", world.world);
+}
+
+pub fn print_world(world: &World) {
     print!("{}", world.world);
 }
 
