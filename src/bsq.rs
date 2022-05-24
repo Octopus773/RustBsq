@@ -86,16 +86,46 @@ impl World {
 /// The function only works with sqaure shaped world with a single `\n` to separate each line
 ///
 pub fn is_square_valid(world: &World, s: &Square) -> bool {
-    println!("s {:?}", s);
     if s.y + s.size > world.width || s.x + s.size > world.width {
         return false;
     }
     for i in s.y..s.y + s.size {
         for j in s.x..s.x + s.size {
             let width = if i != world.width { world.width + 1} else { world.width };
-            println!("i j {} {} {}", i, j, width);
             if world.world.as_bytes()[i * width + j] != '.' as u8 {
-                println!("false");
+                return false;
+            }
+        }
+    }
+    true
+}
+
+/// Checks if the the square of the specified size will fit at the coords if grown by 1
+///
+/// # Arguments
+///
+/// * `world` - The data to look into
+/// * `coords` - The top left corner of the square to check
+/// * `size` - Size of the square to check starting at coords 
+///
+/// # Warning
+///
+/// The function only works with sqaure shaped world with a single `\n` to separate each line
+///
+pub fn is_square_enlargment_valid(world: &World, s: &Square) -> bool {
+    if s.y + s.size + 1 > world.width || s.x + s.size + 1 > world.width {
+        return false;
+    }
+    for i in s.y..=s.y + s.size {
+        for j in s.x..=s.x + s.size {
+            let width = if i != world.width { world.width + 1} else { world.width };
+            if i != s.y + s.size {
+                if world.world.as_bytes()[i * width + j + s.size] != '.' as u8 {
+                    return false;
+                }
+                break;
+            }
+            if world.world.as_bytes()[i * width + j] != '.' as u8 {
                 return false;
             }
         }
@@ -177,6 +207,19 @@ mod test {
 
         let world = super::World::new(String::from("...\n...\n.o."));
         assert_eq!(super::is_square_valid(&world, &super::Square::new((1, 0, 2))), false);
+    }
+
+    #[test]
+    fn is_square_enlargment_valid() {
+        let world = super::World::new(String::from("..3\n1..\n..."));
+        assert_eq!(super::is_square_enlargment_valid(&world, &super::Square::new((0, 0, 1))), false);
+        assert_eq!(super::is_square_enlargment_valid(&world, &super::Square::new((1, 1, 1))), true);
+        assert_eq!(super::is_square_enlargment_valid(&world, &super::Square::new((1, 1, 2))), false);
+        assert_eq!(super::is_square_enlargment_valid(&world, &super::Square::new((2, 2, 12))), false);
+        assert_eq!(super::is_square_enlargment_valid(&world, &super::Square::new((2, 1, 2))), false);
+
+        let world = super::World::new(String::from("...\n...\n.o."));
+        assert_eq!(super::is_square_enlargment_valid(&world, &super::Square::new((0, 1, 1))), true);
     }
 
     #[test]
