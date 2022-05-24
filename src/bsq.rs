@@ -1,6 +1,5 @@
 use std::fs;
 use std::io;
-use std::cmp;
 
 pub struct World {
     world: String,
@@ -82,10 +81,21 @@ impl World {
 /// * `coords` - The top left corner of the square to check
 /// * `size` - Size of the square to check starting at coords 
 ///
+/// # Warning
+///
+/// The function only works with sqaure shaped world with a single `\n` to separate each line
+///
 pub fn is_square_valid(world: &World, s: &Square) -> bool {
-    for i in s.y..cmp::min(s.y + s.size, world.width) {
-        for j in s.x..cmp::min(s.x + s.size, world.width) {
-            if world.world.as_bytes()[i * world.width + j] != '.' as u8 {
+    println!("s {:?}", s);
+    if s.y + s.size > world.width || s.x + s.size > world.width {
+        return false;
+    }
+    for i in s.y..s.y + s.size {
+        for j in s.x..s.x + s.size {
+            let width = if i != world.width { world.width + 1} else { world.width };
+            println!("i j {} {} {}", i, j, width);
+            if world.world.as_bytes()[i * width + j] != '.' as u8 {
+                println!("false");
                 return false;
             }
         }
@@ -183,7 +193,7 @@ mod test {
         assert_eq!(super::find_biggest_square(&world), Some(super::Square::new((1, 1, 2))));
 
 
-        let world = super::World::new(String::from(".....\n.....\n....."));
+        let world = super::World::new(String::from("...\n...\n..."));
         assert_eq!(super::find_biggest_square(&world), Some(super::Square::new((0, 0, 3))));
 
         let world = super::World::new(String::from(".....\n.....\n.....\n.....\n.....\n"));
