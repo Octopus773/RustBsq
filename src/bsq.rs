@@ -120,22 +120,24 @@ pub fn is_square_enlargment_valid(world: &World, s: &Square) -> bool {
     if s.y + s.size + 1 > world.height || s.x + s.size + 1 > world.width {
         return false;
     }
+    // one \n at the end of each line
+    let width = world.width + 1;
     for i in s.y..=s.y + s.size {
         for j in s.x..=s.x + s.size {
-            // one \n at the end of each line
-            let width = if i != world.height { world.width + 1} else { world.width };
+
+            let width = world.width + 1;
             if i != s.y + s.size {
                 if world.world.as_bytes()[i * width + j + s.size] != '.' as u8 {
                     return false;
                 }
                 break;
             }
-            if world.world.as_bytes()[i * width + j] != '.' as u8 {
-                return false;
-            }
         }
     }
-    true
+    let start_index = (s.y + s.size) * width + s.x;
+    let new_bottom_line:&[u8] = &world.world.as_bytes()[start_index..=start_index + s.size];
+
+    new_bottom_line.iter().all(|c| *c == '.' as u8)
 }
 
 /// Gives the size of the maximum legal square at coords
