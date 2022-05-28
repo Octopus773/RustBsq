@@ -122,16 +122,9 @@ pub fn is_square_enlargment_valid(world: &World, s: &Square) -> bool {
     }
     // one \n at the end of each line
     let width = world.width + 1;
-    for i in s.y..=s.y + s.size {
-        for j in s.x..=s.x + s.size {
-
-            let width = world.width + 1;
-            if i != s.y + s.size {
-                if world.world.as_bytes()[i * width + j + s.size] != '.' as u8 {
-                    return false;
-                }
-                break;
-            }
+    for i in s.y..s.y + s.size {
+        if world.world.as_bytes()[i * width + s.x + s.size] != '.' as u8 {
+            return false;
         }
     }
     let start_index = (s.y + s.size) * width + s.x;
