@@ -3,7 +3,7 @@ use std::io;
 
 pub struct World {
     world: String,
-    empty_char: char,
+    empty_char: u8,
     width: usize,
     height: usize,
 }
@@ -59,7 +59,7 @@ impl World {
             height: world.lines().count(),
             width: line_length.unwrap(),
             world,
-            empty_char: '.',
+            empty_char: '.' as u8,
         })
     }
 
@@ -77,33 +77,6 @@ impl World {
     }
 }
 
-/// Checks if the the square of the specified size fit at the coords
-///
-/// # Arguments
-///
-/// * `world` - The data to look into
-/// * `coords` - The top left corner of the square to check
-/// * `size` - Size of the square to check starting at coords 
-///
-/// # Warning
-///
-/// The function only works with sqaure shaped world with a single `\n` to separate each line
-///
-pub fn is_square_valid(world: &World, s: &Square) -> bool {
-    if s.y + s.size > world.width || s.x + s.size > world.width {
-        return false;
-    }
-    for i in s.y..s.y + s.size {
-        for j in s.x..s.x + s.size {
-            let width = if i != world.width { world.width + 1} else { world.width };
-            if world.world.as_bytes()[i * width + j] != '.' as u8 {
-                return false;
-            }
-        }
-    }
-    true
-}
-
 /// Checks if the the square of the specified size will fit at the coords if grown by 1
 ///
 /// # Arguments
@@ -114,23 +87,23 @@ pub fn is_square_valid(world: &World, s: &Square) -> bool {
 ///
 /// # Warning
 ///
-/// The function only works with sqaure shaped world with a single `\n` to separate each line
+/// The function only works with a world with a single `\n` to separate each line
 ///
-pub fn is_square_enlargment_valid(world: &World, s: &Square) -> bool {
+fn is_square_enlargment_valid(world: &World, s: &Square) -> bool {
     if s.y + s.size + 1 > world.height || s.x + s.size + 1 > world.width {
         return false;
     }
     // one \n at the end of each line
     let width = world.width + 1;
     for i in s.y..s.y + s.size {
-        if world.world.as_bytes()[i * width + s.x + s.size] != '.' as u8 {
+        if world.world.as_bytes()[i * width + s.x + s.size] != world.empty_char {
             return false;
         }
     }
     let start_index = (s.y + s.size) * width + s.x;
     let new_bottom_line:&[u8] = &world.world.as_bytes()[start_index..=start_index + s.size];
 
-    new_bottom_line.iter().all(|c| *c == '.' as u8)
+    new_bottom_line.iter().all(|c| *c == world.empty_char)
 }
 
 /// Gives the size of the maximum legal square at coords
@@ -169,7 +142,7 @@ pub fn find_biggest_square(world: &World) -> Option<Square> {
     let mut s = Square{y:0, x:0, size:0};
     for (i, l) in world.world.lines().enumerate() {
         for (j, c) in l.chars().enumerate() {
-            if c != world.empty_char {
+            if c != world.empty_char as char {
                 continue;
             }
             let m_s = get_max_size_from_coords(world, (i, j));
@@ -199,20 +172,6 @@ pub fn print_world(world: &World) {
 
 #[cfg(test)]
 mod test {
-    #[test]
-    fn is_square_valid() {
-        let world = super::World::new(String::from("3\n..3\n1..\n...")).unwrap();
-        assert_eq!(super::is_square_valid(&world, &super::Square::new((0, 0, 2))), false);
-        assert_eq!(super::is_square_valid(&world, &super::Square::new((0, 0, 1))), true);
-        assert_eq!(super::is_square_valid(&world, &super::Square::new((1, 1, 2))), true);
-        assert_eq!(super::is_square_valid(&world, &super::Square::new((1, 0, 1))), false);
-        assert_eq!(super::is_square_valid(&world, &super::Square::new((2, 2, 12))), false);
-        assert_eq!(super::is_square_valid(&world, &super::Square::new((2, 1, 2))), false);
-
-        let world = super::World::new(String::from("3\n...\n...\n.o.")).unwrap();
-        assert_eq!(super::is_square_valid(&world, &super::Square::new((1, 0, 2))), false);
-    }
-
     #[test]
     fn is_square_enlargment_valid() {
         let world = super::World::new(String::from("3\n..3\n1..\n...")).unwrap();
