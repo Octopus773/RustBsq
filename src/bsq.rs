@@ -70,9 +70,7 @@ impl World {
     /// * `path_to_file` - The path to the Epitech formatted BSQ file
     /// 
     pub fn new_from_epitech_file(path_to_file: &str) -> io::Result<World> {
-        let mut data = fs::read_to_string(path_to_file)?;
-
-        match World::new(data) {
+        match World::new(fs::read_to_string(path_to_file)?) {
             Err(s) => Err(io::Error::new(io::ErrorKind::Other, s)),
             Ok(w) => Ok(w),
         }
@@ -119,12 +117,13 @@ pub fn is_square_valid(world: &World, s: &Square) -> bool {
 /// The function only works with sqaure shaped world with a single `\n` to separate each line
 ///
 pub fn is_square_enlargment_valid(world: &World, s: &Square) -> bool {
-    if s.y + s.size + 1 > world.width || s.x + s.size + 1 > world.width {
+    if s.y + s.size + 1 > world.height || s.x + s.size + 1 > world.width {
         return false;
     }
     for i in s.y..=s.y + s.size {
         for j in s.x..=s.x + s.size {
-            let width = if i != world.width { world.width + 1} else { world.width };
+            // one \n at the end of each line
+            let width = if i != world.height { world.width + 1} else { world.width };
             if i != s.y + s.size {
                 if world.world.as_bytes()[i * width + j + s.size] != '.' as u8 {
                     return false;
